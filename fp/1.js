@@ -64,7 +64,10 @@ function reverseArgs(fn) {
 const fakeRequest = (url, data, cb) => {
   log('fake request')(url, data)
 
-  cb('mock response')
+  cb({
+    message: 'response ok',
+    data,
+  })
 }
 
 // [callback, data, url]
@@ -174,3 +177,69 @@ const a5 = cd0(isLt10, 11)
 
 log('a4')(a4)
 log('a5')(a5)
+
+// compsoe
+
+function compose2(fn2, fn1) {
+  return function composed(args) {
+    console.log(fn1, fn2)
+    return fn2(fn1(args))
+  }
+}
+
+const add3 = compose2(tap(log('add 3 result')), (x) => x + 10)
+
+log('add3', add3(10))
+
+function compose(...fns) {
+  return function composed(result) {
+    // copy
+    var list = fns.slice()
+
+    while (list.length > 0) {
+      result = list.pop()(result)
+    }
+
+    return result
+  }
+}
+
+const pipe2 = reverseArgs(compose)
+
+pipe2((x) => x + 10, tap(log('pipe2 add value')))(20)
+
+// partial like Function.prototype.bind
+const rq5 = partial(partialRight(fakeRequest, tap(log('rq5 callback'))), 'http://example.com')
+
+pipe2((x) => x + 10, rq5)(11)
+
+const composeReducerImp1 = (...fns) => (result) => fns.reverse().reduce((result, fn) => fn(result), result)
+
+composeReducerImp1(tap(log('composeReducer1 imp')), (a) => a + 10)(20, 20)
+
+const composeReducerImp2 = (...fns) => fns.reverse().reduce((fn1, fn2) => (...args) => fn2(fn1(...args)))
+
+composeReducerImp2(tap(log('composeReducer2 imp')), (a) => a + 10)(20, 20)
+
+// 这样的话就不支持多个参数传入
+composeReducerImp1(tap(log('composeReducer1 imp 2')), (a, b, c) => a + b + c)(12, 2, 3)
+// ok
+composeReducerImp2(tap(log('composeReducer2 imp 2')), (a, b, c) => a + b + c)(12, 2, 3)
+
+// 还有一个差异在于 implementation 2 是 lazy 执行的
+
+// 递归实现 compose
+// lazy 最终被调用时每个 composeFn 被执行
+function compose3(...fns) {
+  const [fn1, fn2, ...rest] = fns.reverse()
+
+  const composeFn = (...args) => fn2(fn1(...args))
+
+  if (rest.length === 0) {
+    return composeFn
+  }
+
+  return compose3(...rest.reverse(), composeFn)
+}
+
+compose3(tap(log('compose3 imp')), (a, b, c) => a + b + c)(12, 2, 3)

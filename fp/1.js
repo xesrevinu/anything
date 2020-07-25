@@ -223,6 +223,7 @@ composeReducerImp2(tap(log('composeReducer2 imp')), (a) => a + 10)(20, 20)
 
 // 这样的话就不支持多个参数传入
 composeReducerImp1(tap(log('composeReducer1 imp 2')), (a, b, c) => a + b + c)(12, 2, 3)
+
 // ok
 composeReducerImp2(tap(log('composeReducer2 imp 2')), (a, b, c) => a + b + c)(12, 2, 3)
 
@@ -243,3 +244,92 @@ function compose3(...fns) {
 }
 
 compose3(tap(log('compose3 imp')), (a, b, c) => a + b + c)(12, 2, 3)
+
+// don't repeat yourself
+
+// R.compose(
+//   R.objOf('id'),
+//   R.prop('a', x)
+// )
+
+// function makeObjProp(name, value) {
+//   return setProp(name, {}, value)
+// }
+
+// reassignment
+
+function tractEvent(evt, keypresses = () => []) {
+  return function newKeypresses() {
+    return [...keypresses(), evt]
+  }
+}
+
+const event1 = { type: '1' }
+const event2 = { type: '2' }
+
+const keypresses = tractEvent(event1)
+const keypresses2 = tractEvent(event2, keypresses)
+
+// function list(...args) {
+//   return () => {
+//     return [...args]
+//   }
+// }
+
+// function obj (...args) {
+//   let a = {};
+
+//   return () => {
+
+//   }
+// }
+
+// obj({
+//   a: 1,
+//   b: 20,
+//   c: 30
+// })
+
+function uppercaseLetter(c) {
+  var code = c.charCodeAt(0)
+  // 小写字母?
+  if (code >= 97 && code <= 122) {
+    // 转换为大写!
+    code = code - 32
+  }
+  return String.fromCharCode(code)
+}
+
+function stringMap(mapperFn, str) {
+  return [...str].map(mapperFn).join('')
+}
+
+// HELLO WORLD!
+tap(log('uppercase')(stringMap(uppercaseLetter, 'Hello World!')))
+
+// flatten
+
+const flatten1 = (list) => list.reduce((acc, l) => acc.concat(Array.isArray(l) ? flatten1(l) : l), [])
+
+flatten1([1, 2, 3, 4, [1, 2, 3, [2]], [2]])
+
+const flatten2 = (list, depth = Infinity) =>
+  list.reduce(
+    (acc, l) => acc.concat(depth > 0 ? (depth > 1 && Array.isArray(l) ? flatten2(l, depth - 1) : l) : [l]),
+    []
+  )
+
+flatten2([1, 2, [2, 3, [3, 4, [5, 6]]]])
+
+const flatMap = (f, list) => list.reduce((acc, elem) => acc.concat(f(elem)), [])
+
+flatMap((x) => [x, x], [1, 2, 3])
+
+const filter2 = (arr, fn) => arr.filter(fn)
+const filter3 = partialRight(filter2, (x) => x % 2 === 0)
+
+compose(tap(log('filter result')), filter3)([1, 2, 3, 4])
+
+// const guard = (fn) => (args) => (args !== null ? fn(args) : args)
+
+// guard((x) => x.name)()

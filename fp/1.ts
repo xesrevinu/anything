@@ -1,4 +1,3 @@
-/* eslint-disable standard/no-callback-literal */
 import R from 'ramda'
 
 const tap = (fn) => (x) => {
@@ -194,7 +193,7 @@ log('add3', add3(10))
 function compose(...fns) {
   return function composed(result) {
     // copy
-    var list = fns.slice()
+    const list = fns.slice()
 
     while (list.length > 0) {
       result = list.pop()(result)
@@ -291,7 +290,7 @@ const keypresses2 = tractEvent(event2, keypresses)
 // })
 
 function uppercaseLetter(c) {
-  var code = c.charCodeAt(0)
+  let code = c.charCodeAt(0)
   // 小写字母?
   if (code >= 97 && code <= 122) {
     // 转换为大写!

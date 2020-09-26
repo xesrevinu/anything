@@ -1,0 +1,13 @@
+{
+  "restartable": "rs",
+  "verbose": false,
+  "execMap": {
+    "ts": "node -r @swc-node/register",
+    "js": "node -r @swc-node/register"
+  },
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "ignore": [".git", "node_modules"],
+  "ext": "js,ts"
+}

@@ -8,6 +8,6 @@
   "env": {
     "NODE_ENV": "development"
   },
-  "ignore": [".git", "node_modules"],
+  "ignore": [".git", "node_modules","type-challenges"],
   "ext": "js,ts"
 }
